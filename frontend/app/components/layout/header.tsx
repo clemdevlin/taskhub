@@ -41,7 +41,7 @@ export const Header = ({
 
   const { data: userData, isLoading, error } = useUserProfileQuery() as {data: User, isLoading: boolean, error: any};
 
-if (isLoading) toast.loading("Loading user data...");
+if (isLoading) console.log("Loading user data...");
 if (error) toast.error("Failed to load user data");
 
 console.log("User profile:", userData);
