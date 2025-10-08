@@ -132,3 +132,41 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Works on Chrome, Edge, and Safari */
+::-webkit-scrollbar {
+  width: 6px; /* Thin scrollbar */
+  height: 6px; /* For horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Transparent track */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #4a505b; /* Tailwind blue-500 */
+  border-radius: 0; /* Fully rounded thumb */
+}
+
+/* Forcefully hide scrollbar buttons in all directions */
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:start,
+::-webkit-scrollbar-button:end,
+::-webkit-scrollbar-button:horizontal:increment,
+::-webkit-scrollbar-button:horizontal:decrement,
+::-webkit-scrollbar-button:vertical:increment,
+::-webkit-scrollbar-button:vertical:decrement {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4a505b transparent;
+}
+

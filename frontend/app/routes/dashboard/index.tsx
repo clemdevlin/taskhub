@@ -13,6 +13,7 @@ import type {
   TaskTrendsData,
   WorkspaceProductivityData,
 } from "@/types";
+import { Dot } from "lucide-react";
 import { useSearchParams } from "react-router";
 
 const Dashboard = () => {
@@ -60,6 +61,8 @@ const Dashboard = () => {
         <RecentProjects data={data.recentProjects} />
         <UpcomingTasks data={data.upcomingTasks} />
       </div>
+
+      <div className="text-center py-6 text-sm text-muted-foreground flex items-center justify-center"><Dot /> Developed By ClemPixels  <Dot /></div>
     </div>
   );
 };

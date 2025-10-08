@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import Verification from "../models/verification.js";
 import { sendEmail } from "../libs/send-email.js";
 import aj from "../libs/arcjet.js";
+import { defaultWorkspaceForUser } from "./workspace.js";
 
 const registerUser = async (req, res) => {
   try {
@@ -48,8 +49,37 @@ const registerUser = async (req, res) => {
     });
 
     // send email
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-    const emailBody = `<p>Click <a href="${verificationLink}">here</a> to verify your email</p>`;
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`; // <p>Click <a href="${verificationLink}">here</a> to verify your email</p>
+    const emailBody = `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+                          <h2>Welcome to Taskhub 👋</h2>
+                          <p>Hi there,</p>
+                          <p>
+                            Thanks for signing up for <strong>Taskhub</strong> — your all-in-one project management system designed to help you plan, collaborate, and get things done efficiently.
+                          </p>
+                          <p>
+                            To get started, please verify your email address by clicking the button below:
+                          </p>
+                          <p style="text-align: center; margin: 24px 0;">
+                            <a href="${verificationLink}" 
+                              style="background-color: #2563eb; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                              Verify My Email
+                            </a>
+                          </p>
+                          <p>
+                            If the button doesn’t work, you can also copy and paste this link into your browser:
+                            <br>
+                            <a href="${verificationLink}" style="color: #2563eb;">${verificationLink}</a>
+                          </p>
+                          <p>
+                            Once verified, you’ll have full access to your dashboard, where you can start creating projects, managing tasks, and collaborating with your team.
+                          </p>
+                          <p style="margin-top: 32px;">Best regards,<br><strong>The Taskhub Team</strong></p>
+                          <hr style="margin-top: 32px; border: none; border-top: 1px solid #eee;">
+                          <p style="font-size: 12px; color: #888;">
+                            If you didn’t create an account with Taskhub, you can safely ignore this email.
+                          </p>
+                        </div>
+                        `;
     const emailSubject = "Verify your email";
 
     const isEmailSent = await sendEmail(email, emailSubject, emailBody);
@@ -144,10 +174,20 @@ const loginUser = async (req, res) => {
     const userData = user.toObject();
     delete userData.password;
 
+    const workspace = await defaultWorkspaceForUser(user._id);
+
+    const defautProfilePicture =
+      "https://images.unsplash.com/photo-1586006552138-ea18985ab492?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"; // "https://ui-avatars.com/api/?name=" + user.name + "&background=random"
+
+    userData.profilePicture = user.profilePicture ?? defautProfilePicture;
+
+    console.log("User profile sent to frontend:", userData);
+
     res.status(200).json({
       message: "Login successful",
       token,
       user: userData,
+      workspace,
     });
   } catch (error) {
     console.log(error);

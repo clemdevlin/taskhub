@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import morgan from "morgan";
+import bodyParser from "body-parser";
 
 import routes from "./routes/index.js";
 
@@ -26,6 +27,8 @@ mongoose
   .catch((err) => console.log("Failed to connect to DB:", err));
 
 app.use(express.json());
+app.use(bodyParser.json({ limit: "100mb" }));
+app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 
 const PORT = process.env.PORT || 5000;
 

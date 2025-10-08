@@ -5,6 +5,23 @@ import WorkspaceInvite from "../models/workspace-invite.js";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../libs/send-email.js";
 import { recordActivity } from "../libs/index.js";
+import mongoose from "mongoose";
+
+// pseudo-code
+const defaultWorkspaceForUser = async (userId) => {
+  let workspace = await Workspace.findOne({ owner: userId });
+  if (!workspace) {
+    workspace = await Workspace.create({
+      name: "Default Workspace",
+      owner: userId,
+      color: "#3b82f6",
+      members: [
+        { user: userId, role: "owner", joinedAt: new Date() }],
+    });
+  }
+  return workspace;
+}
+
 
 const createWorkspace = async (req, res) => {
   try {
@@ -101,6 +118,10 @@ const getWorkspaceProjects = async (req, res) => {
 const getWorkspaceStats = async (req, res) => {
   try {
     const { workspaceId } = req.params;
+
+    if (!workspaceId || !mongoose.Types.ObjectId.isValid(workspaceId)) {
+      return res.status(400).json({ error: "Invalid workspace ID" });
+    }
 
     const workspace = await Workspace.findById(workspaceId);
 
@@ -531,6 +552,7 @@ const acceptInviteByToken = async (req, res) => {
   }
 };
 export {
+  defaultWorkspaceForUser,
   createWorkspace,
   getWorkspaces,
   getWorkspaceDetails,

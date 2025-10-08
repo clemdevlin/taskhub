@@ -1,19 +1,23 @@
+import { api } from "@/lib/fetch-util";
 import { useAuth } from "@/provider/auth-context";
-import type { Workspace } from "@/types";
-import { Button } from "../ui/button";
+import type { User, Workspace } from "@/types";
 import { Bell, PlusCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLoaderData, useLocation, useNavigate } from "react-router";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuItem,
-  DropdownMenuGroup,
+  DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { Link, useLoaderData, useLocation, useNavigate } from "react-router";
 import { WorkspaceAvatar } from "../workspace/workspace-avatar";
+import { useUserProfileQuery } from "@/hooks/use-user";
+import { toast } from "sonner";
 
 interface HeaderProps {
   onWorkspaceSelected: (workspace: Workspace) => void;
@@ -31,6 +35,49 @@ export const Header = ({
   const { user, logout } = useAuth();
   const { workspaces } = useLoaderData() as { workspaces: Workspace[] };
   const isOnWorkspacePage = useLocation().pathname.includes("/workspace");
+  const [defautWorkspace, setDefautWorkspace] = useState<Workspace | null>(
+    null
+  );
+
+  const { data: userData, isLoading, error } = useUserProfileQuery() as {data: User, isLoading: boolean, error: any};
+
+if (isLoading) toast.loading("Loading user data...");
+if (error) toast.error("Failed to load user data");
+
+console.log("User profile:", userData);
+
+  // const fetchUserProfile = async () => {
+  //   try {
+  //     const response = await api.get("/users/profile");
+  //     console.log("userProfileData", response);
+
+  //     const userData: User = response.data; // or just response if API returns directly
+  //     console.log("userData", userData);
+  //   } catch (error) {
+  //     console.error("Failed to fetch user profile:", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchUserProfile();
+  // }, []);
+
+  useEffect(() => {
+    if (!selectedWorkspace) {
+      const stored = localStorage.getItem("workspace");
+      if (stored) {
+        const workspace: Workspace = JSON.parse(stored);
+        onWorkspaceSelected(workspace);
+        setDefautWorkspace(workspace);
+
+        if (isOnWorkspacePage) {
+          navigate(`/workspaces/${workspace._id}`);
+        } else {
+          navigate(`${window.location.pathname}?workspaceId=${workspace._id}`);
+        }
+      }
+    }
+  }, [selectedWorkspace, onWorkspaceSelected, isOnWorkspacePage, navigate]);
 
   const handleOnClick = (workspace: Workspace) => {
     onWorkspaceSelected(workspace);
@@ -61,8 +108,18 @@ export const Header = ({
                   )}
                   <span className="font-medium">{selectedWorkspace?.name}</span>
                 </>
-              ) : (
+              ) : !defautWorkspace ? (
                 <span className="font-medium">Select Workspace</span>
+              ) : (
+                <>
+                  {defautWorkspace?.color && (
+                    <WorkspaceAvatar
+                      color={defautWorkspace?.color}
+                      name={defautWorkspace.name}
+                    />
+                  )}
+                  <span className="font-medium">{defautWorkspace?.name}</span>
+                </>
               )}
             </Button>
           </DropdownMenuTrigger>
@@ -101,9 +158,9 @@ export const Header = ({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="rounded-full border p-1 w-8 h-8">
+              <button className="rounded-full border p-1 w-8 h-8 cursor-pointer">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={user?.profilePicture} alt={user?.name} />
+                  <AvatarImage src={userData?.profilePicture} alt={user?.name} />
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {user?.name?.charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -114,7 +171,7 @@ export const Header = ({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-point">
                 <Link to="/user/profile">Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

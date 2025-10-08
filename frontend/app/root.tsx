@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import ReactQueryProvider from "./provider/react-query-provider";
+import  Error404 from "./components/Error404";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -56,10 +57,10 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
+    message = error.status === 404 ? "" : "Error";
     details =
       error.status === 404
-        ? "The requested page could not be found."
+        ? "Not Found"
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
@@ -69,7 +70,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return (
     <main className="pt-16 p-4 container mx-auto">
       <h1>{message}</h1>
-      <p>{details}</p>
+      {error && isRouteErrorResponse(error) && error.status === 404 ? (
+        <Error404 />
+      ) : (
+        <p>{details}</p>
+      )}
       {stack && (
         <pre className="w-full p-4 overflow-x-auto">
           <code>{stack}</code>

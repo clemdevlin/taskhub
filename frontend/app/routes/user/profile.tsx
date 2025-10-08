@@ -133,6 +133,43 @@ const Profile = () => {
     );
   };
 
+const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "profile_pics"); // unsigned preset you created
+
+  const CLOUD_NAME="dffqfeinw"
+
+  try {
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.secure_url) {
+      // 🔥 integrate with React Hook Form
+      profileForm.setValue("profilePicture", data.secure_url, {
+        shouldValidate: true,
+      });
+
+      toast.success("Avatar uploaded!");
+    }
+  } catch (err) {
+    console.error("error uploading profile", JSON.stringify(err));
+    toast.error("Failed to upload avatar");
+  }
+};
+
+
+
   if (isPending)
     return (
       <div className="flex justify-center items-center h-screen">
@@ -181,7 +218,7 @@ const Profile = () => {
                     id="avatar-upload"
                     type="file"
                     accept="image/*"
-                    // onChange={handleAvatarChange}
+                    onChange={handleAvatarChange}
                     // disabled={uploading || isUpdatingProfile}
                     style={{ display: "none" }}
                   />
@@ -192,7 +229,7 @@ const Profile = () => {
                     onClick={() =>
                       document.getElementById("avatar-upload")?.click()
                     }
-                    // disabled={uploading || isUpdatingProfile}
+                    disabled={isUpdatingProfile}
                   >
                     Change Avatar
                   </Button>

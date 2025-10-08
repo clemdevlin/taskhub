@@ -157,7 +157,7 @@ const TaskDetails = () => {
                       ? "default"
                       : "outline"
                   }
-                  className="mb-2 capitalize"
+                  className="mb-2 capitalize mr-1"
                 >
                   {task.priority} Priority
                 </Badge>

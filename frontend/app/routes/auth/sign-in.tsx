@@ -43,11 +43,12 @@ const SignIn = () => {
 
   const handleOnSubmit = (values: SigninFormData) => {
     mutate(values, {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         login(data);
         console.log(data);
-        toast.success("Login successful");
-        navigate("/dashboard");
+        toast.success(data?.message || "Login successful");
+        const workspaceId = data?.workspace?._id;
+        navigate(workspaceId ? `/dashboard?workspaceId=${workspaceId}` : "/dashboard");
       },
       onError: (error: any) => {
         const errorMessage =
